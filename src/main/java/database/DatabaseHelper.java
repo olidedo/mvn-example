@@ -70,18 +70,45 @@ public class DatabaseHelper {
         Employee employee = null;
         String query = "INSERT INTO employees VALUES (?,?,?,?,?,?,?,?)";
         PreparedStatement preparedStatement = null;
+        boolean officeExists = getOffice(officeCode);
+        boolean employeeExists = getEmployee(reportsTo);
+        if(officeExists && employeeExists) {
+            try {
+                preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setInt(1, employeeNumber);
+                preparedStatement.setString(3, firstName);
+                preparedStatement.setString(2, lastName);
+                preparedStatement.setString(4, extenstion);
+                preparedStatement.setString(5, email);
+                preparedStatement.setInt(6, officeCode);
+                preparedStatement.setInt(7, reportsTo);
+                preparedStatement.setString(8, jobTitle);
+                employee = new Employee(employeeNumber, firstName, lastName, extenstion, email, officeCode, reportsTo, jobTitle);
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return employee;
+    }
+
+    public boolean getOffice(int officeCode) {
+        boolean exists = false;
+        String query = "SELECT * FROM offices WHERE officeCode=?";
+        PreparedStatement preparedStatement = null;
         try {
             preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, employeeNumber);
-            preparedStatement.setString(3, firstName);
-            preparedStatement.setString(2, lastName);
-            preparedStatement.setString(4, extenstion);
-            preparedStatement.setString(5, email);
-            preparedStatement.setInt(6, officeCode);
-            preparedStatement.setInt(7, reportsTo);
-            preparedStatement.setString(8, jobTitle);
-            employee = new Employee(employeeNumber, firstName, lastName, extenstion, email, officeCode, reportsTo, jobTitle);
-            preparedStatement.executeUpdate();
+            preparedStatement.setInt(1, officeCode);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                exists = true;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -91,7 +118,29 @@ public class DatabaseHelper {
                 e.printStackTrace();
             }
         }
-        return employee;
+        return exists;
+    }
+    public boolean getEmployee(int employeeNumber) {
+        boolean exists = false;
+        String query = "SELECT * FROM employees WHERE employeeNumber=?";
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setInt(1, employeeNumber);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                exists = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return exists;
     }
 
     public String getCustomerOffice(int customerNumber) {

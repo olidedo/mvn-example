@@ -6,18 +6,21 @@ import models.Customer;
 import models.Employee;
 
 import java.sql.*;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     private static int choice;
     private static Scanner input = new Scanner(System.in);
+
     public static void main(String[] args) throws SQLException {
         DatabaseConnection databaseConnection = new DatabaseConnection();
         DatabaseHelper databaseHelper = new DatabaseHelper(databaseConnection);
-        showMenu();
 
+        showMenu();
         try {
+
             while (choice != -1) {
                 if (choice == 1) {
                     List<Customer> customerList = databaseHelper.getAllCustomers();
@@ -76,29 +79,38 @@ public class Main {
                     System.out.println("Enter employee number:");
                     int employeeNumber = input.nextInt();
                     int affectedRows = databaseHelper.deleteEmployee(employeeNumber);
-                    if(affectedRows!=1){
+                    if (affectedRows != 1) {
                         System.out.println("Error deleting employee!");
-                    }
-                    else {
+                    } else {
                         System.out.println("Employee deleted!");
                     }
                     showMenu();
                 }
             }
+        } catch (InputMismatchException ime) {
+            System.out.println("Wrong input! Try again!");
+            System.exit(1);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             databaseConnection.closeConnection();
         }
     }
+
     private static void showMenu() {
-        System.out.println("1- Get all customer's names and surnames");
-        System.out.println("2- Get order status");
-        System.out.println("3- Add an employee");
-        System.out.println("4- Find office of customer");
-        System.out.println("5- Find number of orders in a certain date");
-        System.out.println("6- Delete an employee");
-        System.out.println("Enter the number of an option or -1 to end:");
-        choice = input.nextInt();
+        try {
+            System.out.println("1- Get all customer's names and surnames");
+            System.out.println("2- Get order status");
+            System.out.println("3- Add an employee");
+            System.out.println("4- Find office of customer");
+            System.out.println("5- Find number of orders in a certain date");
+            System.out.println("6- Delete an employee");
+            System.out.println("Enter the number of an option or -1 to end:");
+            choice = input.nextInt();
+        } catch (InputMismatchException ime){
+            System.out.println("Wrong input! Run again!");
+            System.exit(1);
+        }
+
     }
 }
